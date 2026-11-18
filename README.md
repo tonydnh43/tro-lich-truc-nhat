@@ -10,7 +10,7 @@ public/        giao diện (HTML/CSS/JS thuần)
 api/index.js   Vercel Function – nhận mọi request /api/*
 lib/api.js     logic API (dùng chung cho Vercel và chạy ở máy)
 lib/db.js      kết nối database (Turso trên Vercel, file SQLite khi chạy ở máy)
-server.js      server chạy ở máy
+scripts/dev-server.js  server chạy ở máy (không deploy)
 database/      chứa file .sqlite khi chạy ở máy (không deploy)
 ```
 

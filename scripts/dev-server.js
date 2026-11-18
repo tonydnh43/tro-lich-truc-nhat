@@ -1,12 +1,13 @@
-// Chạy ở máy: `npm start` → http://localhost:3000
+// Chỉ dùng khi chạy ở máy: `npm start` → http://localhost:3000
+// (Trên Vercel: public/ là trang tĩnh, api/index.js là function — file này không được deploy.)
 // Dữ liệu lưu ở database/truc-nhat.sqlite (hoặc Turso nếu đặt TURSO_DATABASE_URL).
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import apiHandler from './api/index.js';
+import apiHandler from '../api/index.js';
 
-const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), 'public');
+const PUBLIC = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 const PORT = Number(process.env.PORT || 3000);
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
