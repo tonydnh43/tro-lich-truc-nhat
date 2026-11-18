@@ -1,0 +1,17 @@
+{
+  "name": "phan-chia-truc-nhat",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Lịch trực nhật – Vercel + Turso (libSQL)",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "@libsql/client": "0.14.0"
+  }
+}

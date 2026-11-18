@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Lịch trực nhật</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1 id="title">Lịch trực nhật</h1>
+      <p class="muted" id="today-label"></p>
+    </div>
+    <nav class="actions" aria-label="Quản lý">
+      <button type="button" class="btn ghost" id="open-members" command="show-modal" commandfor="members-dialog">👥 Thành viên</button>
+      <button type="button" class="btn ghost" id="open-tasks" command="show-modal" commandfor="tasks-dialog">🧽 Việc cần làm</button>
+      <button type="button" class="btn ghost" id="open-settings" command="show-modal" commandfor="settings-dialog">⚙️ Cài đặt</button>
+      <button type="button" class="btn ghost" id="open-history">🕘 Lịch sử</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="hero" aria-live="polite"></section>
+
+    <div class="pager" role="group" aria-label="Chuyển tuần">
+      <button type="button" class="btn icon" id="prev" aria-label="Tuần trước">‹</button>
+      <button type="button" class="btn ghost" id="go-today">Tuần này</button>
+      <button type="button" class="btn icon" id="next" aria-label="Tuần sau">›</button>
+    </div>
+
+    <div class="weeks" id="weeks"></div>
+
+  </main>
+
+  <p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+  <!-- ===== Một ngày: người trực + việc cần làm ===== -->
+  <dialog id="day-dialog" closedby="any" aria-labelledby="day-title">
+    <form method="dialog" id="day-form">
+      <h2 id="day-title">Ngày</h2>
+      <fieldset>
+        <legend>Ai trực ngày này?</legend>
+        <div class="choices" id="day-choices"></div>
+      </fieldset>
+      <label class="field" id="day-note-field">
+        <span>Ghi chú (tuỳ chọn)</span>
+        <input name="note" maxlength="120" placeholder="VD: trực thay cho Vi">
+      </label>
+      <label class="check week-check" id="day-week-field">
+        <input type="checkbox" name="whole_week"> <span id="day-week-label">Áp dụng cho cả tuần</span>
+      </label>
+
+      <div class="audit">
+        <label class="field">
+          <span>Người sửa <span aria-hidden="true">*</span></span>
+          <select name="editor" required data-error="day-editor-err"></select>
+          <span class="error-msg" id="day-editor-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần chọn người sửa.</span>
+        </label>
+        <label class="field">
+          <span>Lý do <span id="day-reason-req" class="req-hint">(bắt buộc khi đổi/bỏ người trực)</span></span>
+          <input name="reason" maxlength="200" data-error="day-reason-err" placeholder="VD: Vi bận đi công tác">
+          <span class="error-msg" id="day-reason-err"><span role="img" aria-label="Lỗi">⚠️</span> Đổi người trực thì cần ghi lý do.</span>
+        </label>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Huỷ</button>
+        <button class="btn primary" value="save">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Thành viên ===== -->
+  <dialog id="members-dialog" closedby="none" aria-labelledby="members-title">
+    <form method="dialog" id="members-form">
+      <h2 id="members-title">Thành viên</h2>
+      <p class="muted small">Danh sách người trong nhà. Ai trực ngày nào thì bấm vào ngày đó để phân công.</p>
+      <ul class="edit-list" id="member-list"></ul>
+      <div class="add-row">
+        <input type="color" name="new_color" value="#a78bfa" aria-label="Màu thành viên mới">
+        <input name="new_name" maxlength="40" placeholder="Tên thành viên mới" aria-label="Tên thành viên mới">
+        <button type="button" class="btn" data-add>Thêm</button>
+      </div>
+      <div class="audit">
+        <label class="field">
+          <span>Người sửa <span aria-hidden="true">*</span></span>
+          <select name="editor" required data-error="mem-editor-err"></select>
+          <span class="error-msg" id="mem-editor-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần chọn người sửa.</span>
+        </label>
+        <label class="field">
+          <span>Lý do <span aria-hidden="true">*</span></span>
+          <input name="reason" required maxlength="200" data-error="mem-reason-err" placeholder="VD: Có bạn mới chuyển vào">
+          <span class="error-msg" id="mem-reason-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần ghi lý do.</span>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Huỷ</button>
+        <button class="btn primary" value="save">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Danh sách việc ===== -->
+  <dialog id="tasks-dialog" closedby="none" aria-labelledby="tasks-title">
+    <form method="dialog" id="tasks-form">
+      <h2 id="tasks-title">Việc cần làm khi trực</h2>
+      <p class="muted small">Mỗi ngày người trực sẽ tick từng việc này.</p>
+      <ul class="edit-list" id="task-list"></ul>
+      <div class="add-row">
+        <input name="new_name" maxlength="40" placeholder="VD: Đổ rác" aria-label="Tên việc mới">
+        <button type="button" class="btn" data-add>Thêm</button>
+      </div>
+      <div class="audit">
+        <label class="field">
+          <span>Người sửa <span aria-hidden="true">*</span></span>
+          <select name="editor" required data-error="task-editor-err"></select>
+          <span class="error-msg" id="task-editor-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần chọn người sửa.</span>
+        </label>
+        <label class="field">
+          <span>Lý do <span aria-hidden="true">*</span></span>
+          <input name="reason" required maxlength="200" data-error="task-reason-err" placeholder="VD: Thêm việc lau bếp">
+          <span class="error-msg" id="task-reason-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần ghi lý do.</span>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Huỷ</button>
+        <button class="btn primary" value="save">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Cài đặt ===== -->
+  <dialog id="settings-dialog" closedby="any" aria-labelledby="settings-title">
+    <form method="dialog" id="settings-form">
+      <h2 id="settings-title">Cài đặt</h2>
+      <label class="field">
+        <span>Tiêu đề</span>
+        <input name="title" maxlength="60" required>
+      </label>
+      <div class="audit">
+        <label class="field">
+          <span>Người sửa <span aria-hidden="true">*</span></span>
+          <select name="editor" required data-error="set-editor-err"></select>
+          <span class="error-msg" id="set-editor-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần chọn người sửa.</span>
+        </label>
+        <label class="field">
+          <span>Lý do <span aria-hidden="true">*</span></span>
+          <input name="reason" required maxlength="200" data-error="set-reason-err">
+          <span class="error-msg" id="set-reason-err"><span role="img" aria-label="Lỗi">⚠️</span> Cần ghi lý do.</span>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost" data-close>Huỷ</button>
+        <button class="btn primary" value="save">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== Lịch sử chỉnh sửa ===== -->
+  <dialog id="history-dialog" class="wide" closedby="any" aria-labelledby="history-title">
+    <div class="dialog-head">
+      <h2 id="history-title">Lịch sử chỉnh sửa</h2>
+      <form method="dialog"><button class="btn icon" aria-label="Đóng">✕</button></form>
+    </div>
+    <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="history-title">
+      <table class="history">
+        <thead>
+          <tr><th scope="col">Thời gian</th><th scope="col">Người sửa</th><th scope="col">Nội dung</th><th scope="col">Lý do</th></tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </dialog>
+</body>
+</html>
